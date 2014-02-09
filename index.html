@@ -1,0 +1,643 @@
+﻿<!DOCTYPE html>
+<html class="js consumer chrome" lang="en" id="win">
+  
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <meta charset="utf-8">
+    <!--meta content="initial-scale=1, minimum-scale=1, width=device-width" name="viewport"-->
+	<meta name="viewport" content="width = 960" />
+    <title>
+      Interpreter 
+    </title>
+    <link href="https://fonts.googleapis.com/css?family=Open+Sans:300,400,600,700&subset=latin" rel="stylesheet">
+    <link href="https://www.google.com/intl/en/chrome/assets/common/css/chrome.min.css" rel="stylesheet">
+	<link rel="stylesheet" href="./talkshow/jquery-ui.css" />
+    <script src="./talkshow/jquery-1.9.1.js">
+    </script>
+    <script src="./talkshow/jquery-ui.js">
+    </script>
+	
+	
+	<link href="./talkshow/talkshow.css" rel="stylesheet">
+	<script src="./talkshow/chrome.min.js">
+    </script>
+    <script src="./talkshow/speech.js">
+    </script>
+	<script src="./talkshow/simtran.js">
+    </script>
+	
+  </head>
+  <script>
+    // This code has to live in the html file because it's utf8.  Can't do that in a .js file.
+    var langs = [
+      ['Afrikaans', ['af-ZA']],
+      ['Bahasa Indonesia', ['id-ID']],
+      ['Bahasa Melayu', ['ms-MY']],
+      ['Català', ['ca-ES']],
+      ['Čeština', ['cs-CZ']],
+      ['Deutsch', ['de-DE']],
+      ['English', ['en-AU', 'Australia'],
+       ['en-CA', 'Canada'],
+       ['en-IN', 'India'],
+       ['en-NZ', 'New Zealand'],
+       ['en-ZA', 'South Africa'],
+       ['en-GB', 'United Kingdom'],
+       ['en-US', 'United States']
+      ],
+      ['Español', ['es-AR', 'Argentina'],
+       ['es-BO', 'Bolivia'],
+       ['es-CL', 'Chile'],
+       ['es-CO', 'Colombia'],
+       ['es-CR', 'Costa Rica'],
+       ['es-EC', 'Ecuador'],
+       ['es-SV', 'El Salvador'],
+       ['es-ES', 'España'],
+       ['es-US', 'Estados Unidos'],
+       ['es-GT', 'Guatemala'],
+       ['es-HN', 'Honduras'],
+       ['es-MX', 'México'],
+       ['es-NI', 'Nicaragua'],
+       ['es-PA', 'Panamá'],
+       ['es-PY', 'Paraguay'],
+       ['es-PE', 'Perú'],
+       ['es-PR', 'Puerto Rico'],
+       ['es-DO', 'República Dominicana'],
+       ['es-UY', 'Uruguay'],
+       ['es-VE', 'Venezuela']
+      ],
+      ['Euskara', ['eu-ES']],
+      ['Français', ['fr-FR']],
+      ['Galego', ['gl-ES']],
+      ['Hrvatski', ['hr_HR']],
+      ['IsiZulu', ['zu-ZA']],
+      ['Íslenska', ['is-IS']],
+      ['Italiano', ['it-IT', 'Italia'],
+       ['it-CH', 'Svizzera']
+      ],
+      ['Magyar', ['hu-HU']],
+      ['Nederlands', ['nl-NL']],
+      ['Norsk bokmål', ['nb-NO']],
+      ['Polski', ['pl-PL']],
+      ['Português', ['pt-BR', 'Brasil'],
+       ['pt-PT', 'Portugal']
+      ],
+      ['Română', ['ro-RO']],
+      ['Slovenčina', ['sk-SK']],
+      ['Suomi', ['fi-FI']],
+      ['Svenska', ['sv-SE']],
+      ['Türkçe', ['tr-TR']],
+      ['български', ['bg-BG']],
+      ['Pусский', ['ru-RU']],
+      ['Српски', ['sr-RS']],
+      ['한국어', ['ko-KR']],
+      ['中文', ['cmn-Hans-CN', '普通话 (中国大陆)'],
+       ['cmn-Hans-HK', '普通话 (香港)'],
+       ['cmn-Hant-TW', '中文 (台灣)'],
+       ['yue-Hant-HK', '粵語 (香港)']
+      ],
+      ['日本語', ['ja-JP']],
+      ['Lingua latīna', ['la']],
+      ['Arabic', ['ar']],
+    ];
+  </script>
+  
+  <script>
+    function isCR(e) {
+      var charCode = (e.charCode) ? e.charCode : e.keyCode;
+      return (charCode == 10 || charCode == 13);
+    }
+    
+    function onTextAreaKeyPress(e) {
+      if (isCR(event)) {
+        
+        useTextInput();
+        
+        textInput.blur();
+        
+      }
+      
+      return true;
+    }
+    
+  </script>
+  <style>
+    
+    
+    #product {
+      position:absolute;
+      top:0;
+      left:0;
+      right:0;
+      padding-top:10px;
+      padding-left:10px;
+      height:40px;
+      background:white;
+      border:1px solid #444;
+      font-size:20pt;
+      font-style:light;
+      
+    }
+	
+	#credits {
+	   position: absolute;
+	   top: 225px;
+	   left: 40px;
+	   height:50px;
+	}
+    
+    #source {
+      position:absolute;
+      top:50px;
+      left:0;
+      right:0;
+      height:90px;
+      //   border:1px solid green;
+    }
+	
+	#target {
+      position:absolute;
+      top:140px;
+      left:0;
+      right:0;
+      height:90px;
+      //    border:1px solid blue;
+    }
+    
+    
+    #div_language {
+ //     position:relative;
+ //     right:10px;
+//      top:15px;
+    }
+    
+    
+    #div_target_language {
+//      position:relative;
+ //     right:10px;
+//      top:15px;
+    }
+    
+    .results {
+      position:absolute;
+      font-size:18pt;
+      top:20px;
+      right:420px;
+      left:20px;
+      height:20px;
+    }
+    
+    
+    .mic_button_div {
+      top:10px;
+ //     right:10px;
+    }
+    
+
+    #logs {
+      position:absolute;
+      top:280px;
+      left:0;
+      right:0;
+      bottom:0;
+      font-size:12pt;
+      line-height:120%;
+      //       margin:40px;
+      padding:0;
+      //      border:1px solid red;
+      text-align:top;
+    }
+    
+    .log {
+      position:relative;
+      //    display:inline-block;
+      float:left;
+      width:30%;
+      margin:1%;
+      border:1px solid #444;
+    }
+    
+    .logTitle{
+      font-size:10pt;
+      background:#444;
+      color:white;
+      border:1px solid #444;
+      padding:3px;
+      cursor:pointer;
+    }
+    .logContent {
+      padding:10px;
+      overflow-y:auto;
+      min-height:50px;
+      
+    }
+    
+  </style>
+  
+  
+  <body onload="onLoad();" onresize="onResize();">
+    
+    <div id="wrapper" style="overflow-y:auto">
+      
+      <div id="product">
+
+          <a href="http://webspeechapi.blogspot.com/2013/04/interpreter-hands-free-continuous-voice.html">Interpreter</a> 
+
+        <span id="subTitle" title="Requires the new Web Speech API, currently supported only in Google Chrome Beta">hands-free continuous voice-to-voice translation on the web 
+        </span>
+
+		
+      </div>
+	    
+        <div id="source">
+		
+		<div class="mic_button_div" style="float:left">
+            <a id="butt" title="Click and start talking." href="javascript:startButton()">
+              <span id="goButtonSpan" id="go">
+                go
+              </span>
+              <img id="micButtonImg" src="./talkshow/mic.gif" />
+            </a>
+          </div>
+		  
+          <div id="results" class="results" style="display:block;">
+            <div id="resultsContainer" style="float:right;">
+              <span class="final" id="final_span">
+              </span>
+              <span class="interim" id="interim_span">
+              </span>
+            </div>
+            
+          </div>
+          
+          <div id="resultsText" class="resultsClass" style="display:none;">
+            <textarea type="search" id="textInput" style="width:100%;height:100%;outline:gray" onkeypress="onTextAreaKeyPress(event);">
+            </textarea>
+          </div>
+		
+          <div id="div_language" class="div_language">
+            <select id="select_language" onchange="updateCountry()">
+              <option value="0">
+                Afrikaans
+              </option>
+              <option value="1">
+                Bahasa Indonesia
+              </option>
+              <option value="2">
+                Bahasa Melayu
+              </option>
+              <option value="3">
+                Català
+              </option>
+              <option value="4">
+                Čeština
+              </option>
+              <option value="5">
+                Deutsch
+              </option>
+              <option value="6">
+                English
+              </option>
+              <option value="7">
+                Español
+              </option>
+              <option value="8">
+                Euskara
+              </option>
+              <option value="9">
+                Français
+              </option>
+              <option value="10">
+                Galego
+              </option>
+              <option value="11">
+                Hrvatski
+              </option>
+              <option value="12">
+                IsiZulu
+              </option>
+              <option value="13">
+                Íslenska
+              </option>
+              <option value="14">
+                Italiano
+              </option>
+              <option value="15">
+                Magyar
+              </option>
+              <option value="16">
+                Nederlands
+              </option>
+              <option value="17">
+                Norsk bokmål
+              </option>
+              <option value="18">
+                Polski
+              </option>
+              <option value="19">
+                Português
+              </option>
+              <option value="20">
+                Română
+              </option>
+              <option value="21">
+                Slovenčina
+              </option>
+              <option value="22">
+                Suomi
+              </option>
+              <option value="23">
+                Svenska
+              </option>
+              <option value="24">
+                Türkçe
+              </option>
+              <option value="25">
+                български
+              </option>
+              <option value="26">
+                Pусский
+              </option>
+              <option value="27">
+                Српски
+              </option>
+              <option value="28">
+                한국어
+              </option>
+              <option value="29">
+                中文
+              </option>
+              <option value="30">
+                日本語
+              </option>
+              <option value="31">
+                Lingua latīna
+              </option>
+              <option value="32">
+                Arabic 
+              </option>
+            </select>
+            &nbsp;&nbsp;
+            <select id="select_dialect" style="visibility: visible;" onchange="bounceLanguage();">
+              <option value="en-AU">
+                Australia
+              </option>
+              <option value="en-CA">
+                Canada
+              </option>
+              <option value="en-IN">
+                India
+              </option>
+              <option value="en-NZ">
+                New Zealand
+              </option>
+              <option value="en-ZA">
+                South Africa
+              </option>
+              <option value="en-GB">
+                United Kingdom
+              </option>
+              <option value="en-US">
+                United States
+              </option>
+            </select>
+          </div>
+		  
+        </div id="source">     
+
+        <div id="target">
+		
+	       <div class="mic_button_div" id="speaker_button_div" style="float:left">
+            <a id="butt" title="Play translations as they arrive" href="javascript:speakerButtonClick(event)">
+              <img id="speakerButtonImg" src="./talkshow/speaker.gif" style="width:30px;position:absolute;top:10px;left:10px">
+            </a>
+          </div>
+		  
+	       <div class="results" style="display:block">
+            <div id="targetResultsContainer"></div>
+          </div>
+          	  
+          <div id="div_target_language" class="div_language">
+            <select id="select_target_language" onchange="updateTargetCountry()">
+              <option value="0">
+                Afrikaans
+              </option>
+              <option value="1">
+                Bahasa Indonesia
+              </option>
+              <option value="2">
+                Bahasa Melayu
+              </option>
+              <option value="3">
+                Català
+              </option>
+              <option value="4">
+                Čeština
+              </option>
+              <option value="5">
+                Deutsch
+              </option>
+              <option value="6">
+                English
+              </option>
+              <option value="7">
+                Español
+              </option>
+              <option value="8">
+                Euskara
+              </option>
+              <option value="9">
+                Français
+              </option>
+              <option value="10">
+                Galego
+              </option>
+              <option value="11">
+                Hrvatski
+              </option>
+              <option value="12">
+                IsiZulu
+              </option>
+              <option value="13">
+                Íslenska
+              </option>
+              <option value="14">
+                Italiano
+              </option>
+              <option value="15">
+                Magyar
+              </option>
+              <option value="16">
+                Nederlands
+              </option>
+              <option value="17">
+                Norsk bokmål
+              </option>
+              <option value="18">
+                Polski
+              </option>
+              <option value="19">
+                Português
+              </option>
+              <option value="20">
+                Română
+              </option>
+              <option value="21">
+                Slovenčina
+              </option>
+              <option value="22">
+                Suomi
+              </option>
+              <option value="23">
+                Svenska
+              </option>
+              <option value="24">
+                Türkçe
+              </option>
+              <option value="25">
+                български
+              </option>
+              <option value="26">
+                Pусский
+              </option>
+              <option value="27">
+                Српски
+              </option>
+              <option value="28">
+                한국어
+              </option>
+              <option value="29">
+                中文
+              </option>
+              <option value="30">
+                日本語
+              </option>
+              <option value="31">
+                Lingua latīna
+              </option>
+              <option value="32">
+                Arabic 
+              </option>
+            </select>
+            &nbsp;&nbsp;
+            <select id="select_target_dialect" style="display:none;">
+              <option value="en-AU">
+                Australia
+              </option>
+              <option value="en-CA">
+                Canada
+              </option>
+              <option value="en-IN">
+                India
+              </option>
+              <option value="en-NZ">
+                New Zealand
+              </option>
+              <option value="en-ZA">
+                South Africa
+              </option>
+              <option value="en-GB">
+                United Kingdom
+              </option>
+              <option value="en-US">
+                United States
+              </option>
+            </select>
+            <a href="javascript:reverse();" title="Use the current source language as target, and the current target language as source">swap languages</a>
+          </div>
+          
+        </div id="target">
+      
+      <div id="info">
+        <p id="info_speak_now" style="display: none;">
+          Speak now.
+        </p>
+        <div id="info_no_speech" style="display: none;">
+          No speech was detected. You may need to adjust your
+          <a href="https://support.google.com/chrome/bin/answer.py?hl=en&answer=1407892">
+            microphone settings
+          </a>
+          .
+        </div>
+        <div id="info_no_microphone" style="display: none;" title="No microphone">
+          No microphone was found. Ensure that a microphone is installed and that
+          <a href="https://support.google.com/chrome/bin/answer.py?hl=en&answer=1407892">
+            microphone settings
+          </a>
+          are configured correctly.
+        </div>
+        <div id="info_allow" style="display: none;" title="Permission denied">
+          Click the "Allow" button above to enable your microphone.
+        </div>
+        <div id="info_denied" style="display: none;" title="Permission denied">
+          Permission to use microphone was denied.  To change, go to your
+          <a href="chrome://settings/content">
+            Chrome settings page
+          </a>
+          .			
+        </div>
+        <div id="info_blocked" style="display: none;" title="Permission blocked">
+          Permission to use microphone is blocked. To change, go to your
+          <a href="chrome://settings/content">
+            Chrome settings page
+          </a>
+          .
+        </div>
+        
+        
+        <div id="info_upgrade" style="display: none;" title="Web Speech API not supported">
+          The interface was designed for continuous speech recognition.  The Web Speech API is not supported by this browser. You can view the video and text-mode demos here, but to get the real experience, upgrade to
+          <a href="https://www.google.com/intl/en/chrome/browser/beta.html">
+            Chrome version 25 beta
+          </a>
+          or later. 
+        </div>
+        
+        
+      </div>
+	  
+ 
+      
+      <div id="logs">
+        <div class="log">
+          <div id="source_logTitle" class="logTitle" style="cursor:auto">
+            Source
+          </div>
+          <div class="logContent" id="Source_log">
+          </div>
+        </div>
+
+        <div class="log">
+          <div id="Bing_logTitle" class="logTitle" onclick="selectEngine('Bing');">
+            Bing
+          </div>
+          <div class="logContent" id="Bing_log">
+          </div>
+        </div>
+		
+		<div class="log">
+          <div id="Backtrans_logTitle" class="logTitle" onclick="selectEngine('Backtrans');">
+            Backtrans
+		  </div>
+          <div class="logContent" id="Backtrans_log">
+          </div>
+        </div>
+		
+      </div id="logs">
+	  
+	  	 <div id="credits">
+		  <ul>
+		    <li>Speech Recognition:  <a target="_new" href="http://updates.html5rocks.com/2013/01/Voice-Driven-Web-Apps-Introduction-to-the-Web-Speech-API">Web Speech API</a></li>
+		    <li>Translation: <a href="http://datamarket.azure.com/dataset/bing/microsofttranslator">Bing Translator API</a></li>
+		    <li>Speech Synthesis: <a href="http://techcrunch.com/2009/12/14/the-unofficial-google-text-to-speech-api/">Google Translate tts</a></li>
+		  </ul>
+	  </div> 
+
+      
+    <input type="checkbox" id="chkBoxSearchNames" checked style="display:none"/>
+    <input type="checkbox" id="chkBoxSearchPhrases" style="display:none"/>
+    </div id="wrapper">
+    
+  </body>
+  
+</html>
+
